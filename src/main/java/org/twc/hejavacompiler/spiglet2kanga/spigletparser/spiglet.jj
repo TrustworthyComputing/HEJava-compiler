@@ -1,0 +1,387 @@
+options {
+  JAVA_UNICODE_ESCAPE = true;
+  STATIC = false;
+}
+
+PARSER_BEGIN(SpigletParser)
+  package org.twc.hejavacompiler.spiglet2kanga.spigletparser;
+  public class SpigletParser {}
+PARSER_END(SpigletParser)
+
+SKIP : /* WHITE SPACE */
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+| "\f"
+}
+
+SPECIAL_TOKEN : /* COMMENTS */
+{
+  <SINGLE_LINE_COMMENT: "//" (~["\n","\r"])* ("\n"|"\r"|"\r\n")>
+| <FORMAL_COMMENT: "/**" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/">
+| <MULTI_LINE_COMMENT: "/*" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/">
+}
+
+
+TOKEN :
+{
+  < LPAREN: "(" >
+| < RPAREN: ")" >
+| < LBRACE: "{" >
+| < RBRACE: "}" >
+| < LSQPAREN: "[" >
+| < RSQPAREN: "]" >
+| < DOT: "." >
+| < LT: "LT" >
+| < LTE: "LTE" >
+| < GT: "GT" >
+| < GTE: "GTE" >
+| < EQ: "EQ" >
+| < NEQ: "NEQ" >
+| < PLUS: "PLUS" >
+| < MINUS: "MINUS" >
+| < TIMES : "TIMES" >
+| < DIV : "DIV" >
+| < MOD : "MOD" >
+| < AND : "AND" >
+| < OR : "OR" >
+| < BINXOR : "XOR" >
+| < SLL : "SLL" >
+| < SRL : "SRL" >
+| < NOT : "NOT" >
+| < E_LT: "E_LT" >
+| < E_LTE: "E_LTE" >
+| < E_GT: "E_GT" >
+| < E_GTE: "E_GTE" >
+| < E_EQ: "E_EQ" >
+| < E_NEQ: "E_NEQ" >
+| < E_PLUS: "E_PLUS" >
+| < E_MINUS: "E_MINUS" >
+| < E_TIMES : "E_TIMES" >
+| < E_DIV : "E_DIV" >
+| < E_MOD : "E_MOD" >
+| < E_AND : "E_AND" >
+| < E_OR : "E_OR" >
+| < E_BINXOR : "E_XOR" >
+| < E_SLL : "E_SLL" >
+| < E_SRL : "E_SRL" >
+| < E_NOT : "E_NOT" >
+| < MAIN: "MAIN" >
+| < CODE: "CODE" >
+| < HALLOCATE: "HALLOCATE" >
+| < END: "END" >
+| < NOOP: "NOOP" >
+| < MOVE : "MOVE" >
+| < E_CONST : "E_CONST" >
+| < CALL : "CALL" >
+| < ERROR : "ERROR" >
+| < PRINT: "PRINT" >
+| < PRINTLN: "PRINTLN" >
+| < PUBLIC_READ: "PUBREAD" >
+| < PRIVATE_READ: "SECREAD" >
+| < PUBLIC_SEEK: "PUBSEEK" >
+| < PRIVATE_SEEK: "SECSEEK" >
+| < ANSWER: "ANSWER" >
+| < BEGIN: "BEGIN" >
+| < RETURN: "RETURN" >
+| < JUMP : "JUMP" >
+| < CJUMP : "CJUMP" >
+| < HSTORE: "HSTORE" >
+| < HLOAD : "HLOAD" >
+| < MEM: "MEM" >
+| < TEMP: "TEMP" >
+| < ARG: "ARG" >
+}
+
+TOKEN : /* LITERALS */
+{
+  < INTEGER_LITERAL: ( ["1"-"9"] (["0"-"9"])* | "0" ) >
+}
+
+TOKEN : /* IDENTIFIERS */
+{
+  < IDENTIFIER: <LETTER> (<LETTER>|<DIGIT>)* >
+|
+  < #LETTER:
+      [
+       "\u0024",
+       "\u0041"-"\u005a",
+       "\u005f",
+       "\u0061"-"\u007a",
+       "\u00c0"-"\u00d6",
+       "\u00d8"-"\u00f6",
+       "\u00f8"-"\u00ff",
+       "\u0100"-"\u1fff",
+       "\u3040"-"\u318f",
+       "\u3300"-"\u337f",
+       "\u3400"-"\u3d2d",
+       "\u4e00"-"\u9fff",
+       "\uf900"-"\ufaff"
+      ]
+  >
+|
+  < #DIGIT:
+      [
+       "\u0030"-"\u0039",
+       "\u0660"-"\u0669",
+       "\u06f0"-"\u06f9",
+       "\u0966"-"\u096f",
+       "\u09e6"-"\u09ef",
+       "\u0a66"-"\u0a6f",
+       "\u0ae6"-"\u0aef",
+       "\u0b66"-"\u0b6f",
+       "\u0be7"-"\u0bef",
+       "\u0c66"-"\u0c6f",
+       "\u0ce6"-"\u0cef",
+       "\u0d66"-"\u0d6f",
+       "\u0e50"-"\u0e59",
+       "\u0ed0"-"\u0ed9",
+       "\u1040"-"\u1049"
+      ]
+  >
+}
+
+/***********************************
+ * The Spiglet Grammar Starts Here *
+ ***********************************/
+
+
+void Goal() :
+{}
+{
+  "MAIN" StmtList() "END" ( Procedure() )* <EOF>
+}
+
+void StmtList() :
+{}
+{
+  ( ( Label() )? Stmt() )*
+}
+
+void Procedure() :
+{}
+{
+  Label() "[" IntegerLiteral() "]" StmtExp()
+}
+
+void Stmt() :
+{}
+{
+  NoOpStmt()
+| ErrorStmt()
+| CJumpStmt()
+| JumpStmt()
+| HStoreStmt()
+| HLoadStmt()
+| MoveStmt()
+| EConstStmt()
+| PrintStmt()
+| PrintlnStmt()
+| AnswerStmt()
+| PublicReadStmt()
+| PrivateReadStmt()
+| PublicSeekStmt()
+| PrivateSeekStmt()
+}
+
+void NoOpStmt() :
+{}
+{
+  "NOOP"
+}
+
+void ErrorStmt() :
+{}
+{
+  "ERROR"
+}
+
+void CJumpStmt() :
+{}
+{
+  "CJUMP" Temp() Label()
+}
+
+void JumpStmt() :
+{}
+{
+  "JUMP" Label()
+}
+
+void HStoreStmt() :
+{}
+{
+  "HSTORE" Temp() IntegerLiteral() Temp()
+}
+
+void HLoadStmt() :
+{}
+{
+  "HLOAD" Temp() Temp() IntegerLiteral()
+}
+
+void MoveStmt() :
+{}
+{
+  "MOVE" Temp() Exp()
+}
+
+void EConstStmt() :
+{}
+{
+  "E_CONST" Temp() Exp()
+}
+
+void PrintStmt() :
+{}
+{
+  "PRINT" SimpleExp()
+}
+
+void PrintlnStmt() :
+{}
+{
+  "PRINTLN" SimpleExp()
+}
+
+void AnswerStmt() :
+{}
+{
+  "ANSWER" SimpleExp()
+}
+
+void PublicReadStmt() :
+{}
+{
+  "PUBREAD" Temp()
+}
+
+void PrivateReadStmt() :
+{}
+{
+  "SECREAD" Temp()
+}
+
+void PublicSeekStmt() :
+{}
+{
+  "PUBSEEK" Temp() SimpleExp()
+}
+
+void PrivateSeekStmt() :
+{}
+{
+  "SECSEEK" Temp() SimpleExp()
+}
+
+void Exp():
+{}
+{
+  Call()
+|
+  HAllocate()
+|
+  BinOp()
+|
+  NotExp()
+|
+  SimpleExp()
+}
+
+void StmtExp() :
+{}
+{
+  "BEGIN" StmtList() "RETURN" SimpleExp() "END"
+}
+
+void Call() :
+{}
+{
+  "CALL" SimpleExp() "(" ( Temp() )* ")"
+}
+
+void HAllocate() :
+{}
+{
+  "HALLOCATE" SimpleExp()
+}
+
+void BinOp() :
+{}
+{
+  Operator() Temp() SimpleExp()
+}
+
+void Operator() :
+{}
+{
+  "LT"
+| "LTE"
+| "GT"
+| "GTE"
+| "EQ"
+| "NEQ"
+| "PLUS"
+| "MINUS"
+| "TIMES"
+| "DIV"
+| "MOD"
+| "AND"
+| "OR"
+| "XOR"
+| "SLL"
+| "SRL"
+| "E_LT"
+| "E_LTE"
+| "E_GT"
+| "E_GTE"
+| "E_EQ"
+| "E_NEQ"
+| "E_PLUS"
+| "E_MINUS"
+| "E_TIMES"
+| "E_DIV"
+| "E_MOD"
+| "E_AND"
+| "E_OR"
+| "E_XOR"
+| "E_SLL"
+| "E_SRL"
+}
+
+void NotExp() :
+{}
+{
+  ("NOT" | "E_NOT") SimpleExp()
+}
+
+void SimpleExp() :
+{}
+{
+  Temp()
+|
+  IntegerLiteral()
+|
+  Label()
+}
+
+void Temp() :
+{}
+{
+  "TEMP" IntegerLiteral()
+}
+
+void IntegerLiteral() :
+{}
+{
+  <INTEGER_LITERAL>
+}
+
+void Label() :
+{}
+{
+  <IDENTIFIER>
+}
+

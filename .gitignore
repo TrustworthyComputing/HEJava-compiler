@@ -1,0 +1,37 @@
+*.class
+*.asm
+*.spg
+*.kg
+*.opt
+*.txt
+*.out
+*-jtb.jj
+
+*.iml
+*.idea
+target
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.war
+*.ear
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+*.tar.gz
+*.html
+
+src/main/java/org/twc/hejavacompiler/hejava2spiglet/hejavavisitor/*.java
+src/main/java/org/twc/hejavacompiler/hejava2spiglet/hejavasyntaxtree/*.java
+src/main/java/org/twc/hejavacompiler/hejava2spiglet/hejavaparser/*.java
+
+src/main/java/org/twc/hejavacompiler/spiglet2kanga/spigletvisitor/*.java
+src/main/java/org/twc/hejavacompiler/spiglet2kanga/spigletsyntaxtree/*.java
+src/main/java/org/twc/hejavacompiler/spiglet2kanga/spigletparser/*.java
+
+src/main/java/org/twc/hejavacompiler/kanga2asm/kangavisitor/*.java
+src/main/java/org/twc/hejavacompiler/kanga2asm/kangasyntaxtree/*.java
+src/main/java/org/twc/hejavacompiler/kanga2asm/kangaparser/*.java
