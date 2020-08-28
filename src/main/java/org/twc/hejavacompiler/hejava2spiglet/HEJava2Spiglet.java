@@ -352,6 +352,7 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
      * | ArrayAssignmentStatement()
      * | IfStatement()
      * | WhileStatement()
+     * | ForStatement()
      * | PrintStatement()
      * | PrintLineStatement()
      * | AnswerStatement()
@@ -656,6 +657,31 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
         this.asm_.append("MOVE ").append(cond).append(" ").append(expr).append("\n");
         this.asm_.append("CJUMP ").append(cond).append(" ").append(lend).append("\n");
         n.f4.accept(this, argu);
+        this.asm_.append("JUMP ").append(lstart).append("\n").append(lend).append(" NOOP\n");
+        return null;
+    }
+
+    /**
+     * f0 -> "for"
+     * f1 -> "("
+     * f2 -> VarDeclaration()
+     * f3 -> Expression()
+     * f4 -> ";"
+     * f5 -> ( AssignmentStatement() | IncrementAssignmentStatement() | DecrementAssignmentStatement() | CompoundAssignmentStatement() )
+     * f6 -> ")"
+     * f7 -> Statement()
+     */
+    public Base_t visit(ForStatement n, Base_t argu) throws Exception {
+        n.f2.accept(this, argu);
+        String lstart = this.newLabel();
+        String lend = this.newLabel();
+        String cond_tmp = newTemp();
+        this.asm_.append(lstart).append(" NOOP\n");
+        String cond = ((Variable_t) n.f3.accept(this, argu)).getRegister();
+        this.asm_.append("MOVE ").append(cond_tmp).append(" ").append(cond).append("\n");
+        this.asm_.append("CJUMP ").append(cond_tmp).append(" ").append(lend).append("\n");
+        n.f7.accept(this, argu);
+        n.f5.accept(this, argu);
         this.asm_.append("JUMP ").append(lstart).append("\n").append(lend).append(" NOOP\n");
         return null;
     }

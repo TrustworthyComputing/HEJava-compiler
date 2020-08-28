@@ -385,7 +385,12 @@ void WhileStatement() :
 void ForStatement() :
 {}
 {
-	"for" "(" VarDeclaration() Expression() ";" Expression() ")" Statement()
+	"for" "("
+	    VarDeclaration()
+	    Expression() ";"
+	    ( LOOKAHEAD(2) AssignmentStatement() | LOOKAHEAD(2) IncrementAssignmentStatement() | LOOKAHEAD(2) DecrementAssignmentStatement() | LOOKAHEAD(2) CompoundAssignmentStatement() )
+    ")"
+    Statement()
 }
 
 void PrintStatement() :

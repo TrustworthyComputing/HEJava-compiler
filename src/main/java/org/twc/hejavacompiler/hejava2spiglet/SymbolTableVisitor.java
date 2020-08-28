@@ -102,7 +102,17 @@ public class SymbolTableVisitor extends GJNoArguDepthFirst<Base_t> {
 
             }
         }
-        n.f15.accept(this);
+        if (n.f15.present()) {
+            for (int i = 0; i < n.f15.size(); i++) {
+                Variable_t var_from_for_statement = (Variable_t) n.f15.nodes.get(i).accept(this);
+                if (var_from_for_statement != null) {
+                    System.out.println("main :" + var_from_for_statement.getName());
+                    if (!m.addVar(new Variable_t(var_from_for_statement.getType(), var_from_for_statement.getName()))) {
+                        throw new Exception("Class " + classname + ": Variable " + var_from_for_statement.getName() + " already exists");
+                    }
+                }
+            }
+        }
         n.f16.accept(this);
         n.f17.accept(this);
         return null;
@@ -363,7 +373,18 @@ public class SymbolTableVisitor extends GJNoArguDepthFirst<Base_t> {
                 }
             }
         }
-        n.f8.accept(this);
+        // add any vars from for statements
+        if (n.f8.present()) {
+            for (int i = 0; i < n.f8.size(); i++) {
+                Variable_t var_from_for_statement = (Variable_t) n.f8.nodes.get(i).accept(this);
+                if (var_from_for_statement != null) {
+                    System.out.println("main :" + var_from_for_statement.getName());
+                    if (!meth.addVar(new Variable_t(var_from_for_statement.getType(), var_from_for_statement.getName()))) {
+                        throw new Exception("Class " + meth_name + ": Variable " + var_from_for_statement.getName() + " already exists");
+                    }
+                }
+            }
+        }
         n.f9.accept(this);
         n.f10.accept(this);
         n.f11.accept(this);
@@ -422,6 +443,41 @@ public class SymbolTableVisitor extends GJNoArguDepthFirst<Base_t> {
         return n.f1.accept(this);
     }
 
+    /**
+     * f0 -> Block()
+     * | AssignmentStatement() ";"
+     * | IncrementAssignmentStatement() ";"
+     * | DecrementAssignmentStatement() ";"
+     * | CompoundAssignmentStatement() ";"
+     * | ArrayAssignmentStatement() ";"
+     * | IfStatement()
+     * | WhileStatement()
+     * | ForStatement()
+     * | PrintStatement() ";"
+     * | PrintLineStatement() ";"
+     * | AnswerStatement() ";"
+     */
+    public Base_t visit(Statement n) throws Exception {
+        return n.f0.accept(this);
+    }
+
+    /**
+     * f0 -> "for"
+     * f1 -> "("
+     * f2 -> VarDeclaration()
+     * f3 -> Expression()
+     * f4 -> ";"
+     * f5 -> ( AssignmentStatement() | IncrementAssignmentStatement() | DecrementAssignmentStatement() | CompoundAssignmentStatement() )
+     * f6 -> ")"
+     * f7 -> Statement()
+     */
+    public Base_t visit(ForStatement n) throws Exception {
+        Variable_t vardef = (Variable_t) n.f2.accept(this);
+        n.f3.accept(this);
+        n.f5.accept(this);
+        n.f7.accept(this);
+        return vardef;
+    }
 
     /**
      * f0 -> ArrayType()

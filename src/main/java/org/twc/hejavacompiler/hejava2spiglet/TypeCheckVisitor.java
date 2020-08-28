@@ -319,6 +319,7 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
      * | ArrayAssignmentStatement() ";"
      * | IfStatement()
      * | WhileStatement()
+     * | ForStatement()
      * | PrintStatement() ";"
      * | PrintLineStatement() ";"
      * | AnswerStatement() ";"
@@ -534,6 +535,34 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
             throw new Exception("WhileStatement Cannot branch on encrypted data: " + expr.getType());
         }
         throw new Exception("WhileStatement is not a boolean Expression");
+    }
+
+    /**
+     * f0 -> "for"
+     * f1 -> "("
+     * f2 -> VarDeclaration()
+     * f3 -> Expression()
+     * f4 -> ";"
+     * f5 -> ( AssignmentStatement() | IncrementAssignmentStatement() | DecrementAssignmentStatement() | CompoundAssignmentStatement() )
+     * f6 -> ")"
+     * f7 -> Statement()
+     */
+    public Base_t visit(ForStatement n, Base_t argu) throws Exception {
+        n.f2.accept(this, argu);
+
+        Variable_t cond = (Variable_t) n.f3.accept(this, argu);
+        n.f5.accept(this, argu);
+        n.f7.accept(this, argu);
+        if (cond.getType() == null) {
+            cond = findType(cond, (Method_t) argu);
+        }
+        if (cond.getType().equals("boolean")) {
+            return null;
+        } else if (cond.getType().equals("EncInt")) {
+            throw new Exception("For Statement cannot branch on encrypted data: " + cond.getType());
+        } else {
+            throw new Exception("The condition in the for loop is not a boolean expression");
+        }
     }
 
     /**
