@@ -152,13 +152,13 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
     public Base_t visit(VarDeclaration n, Base_t argu) throws Exception {
         String typedecl = ((Variable_t) n.f0.accept(this, argu)).getType();
         String assigned_type = ((Variable_t) n.f1.accept(this, argu)).getType();
-        if (!typedecl.equals(assigned_type)) {
+        if (assigned_type != null && !typedecl.equals(assigned_type)) {
             throw new Exception("Error in inline assignment. Different types: " + typedecl + " " + assigned_type);
         }
         if (n.f2.present()) {
             for (int i = 0; i < n.f2.size(); i++) {
                 assigned_type = ((Variable_t) n.f2.nodes.get(i).accept(this, argu)).getType();
-                if (!typedecl.equals(assigned_type)) {
+                if (assigned_type != null && !typedecl.equals(assigned_type)) {
                     throw new Exception("Error in inline assignment. Different types: " + typedecl + " " + assigned_type);
                 }
             }
@@ -172,7 +172,7 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
      */
     public Base_t visit(Variable n, Base_t argu) throws Exception {
         String varname = n.f0.accept(this, argu).getName();
-        String varType = "";
+        String varType = null;
         if (n.f1.present()) {
             varType = ((Variable_t) n.f1.accept(this, argu)).getType();
         }
@@ -312,16 +312,16 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
 
     /**
      * f0 -> Block()
-     * | AssignmentStatement()
-     * | IncrementAssignmentStatement()
-     * | DecrementAssignmentStatement()
-     * | CompoundAssignmentStatement()
-     * | ArrayAssignmentStatement()
+     * | AssignmentStatement() ";"
+     * | IncrementAssignmentStatement() ";"
+     * | DecrementAssignmentStatement() ";"
+     * | CompoundAssignmentStatement() ";"
+     * | ArrayAssignmentStatement() ";"
      * | IfStatement()
      * | WhileStatement()
-     * | PrintStatement()
-     * | PrintLineStatement()
-     * | AnswerStatement()
+     * | PrintStatement() ";"
+     * | PrintLineStatement() ";"
+     * | AnswerStatement() ";"
      */
     public Base_t visit(Statement n, Base_t argu) throws Exception {
         return n.f0.accept(this, argu);
@@ -341,7 +341,6 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
      * f0 -> Identifier()
      * f1 -> "="
      * f2 -> Expression()
-     * f3 -> ";"
      */
     public Base_t visit(AssignmentStatement n, Base_t argu) throws Exception {
         Variable_t t1 = (Variable_t) n.f0.accept(this, argu);
@@ -370,7 +369,6 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
     /**
      * f0 -> Identifier()
      * f1 -> "++"
-     * f2 -> ";"
      */
     public Base_t visit(IncrementAssignmentStatement n, Base_t argu) throws Exception {
         Variable_t t1 = (Variable_t) n.f0.accept(this, argu);
@@ -385,7 +383,6 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
     /**
      * f0 -> Identifier()
      * f1 -> "--"
-     * f2 -> ";"
      */
     public Base_t visit(DecrementAssignmentStatement n, Base_t argu) throws Exception {
         Variable_t t1 = (Variable_t) n.f0.accept(this, argu);
@@ -401,7 +398,6 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
      * f0 -> Identifier()
      * f1 -> CompoundOperator()
      * f2 -> Expression()
-     * f3 -> ";"
      */
     public Base_t visit(CompoundAssignmentStatement n, Base_t argu) throws Exception {
         Variable_t t1 = (Variable_t) n.f0.accept(this, argu);
@@ -439,7 +435,6 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
      * f3 -> "]"
      * f4 -> "="
      * f5 -> Expression()
-     * f6 -> ";"
      */
     public Base_t visit(ArrayAssignmentStatement n, Base_t argu) throws Exception {
         Variable_t array = (Variable_t) n.f0.accept(this, argu);
@@ -546,14 +541,12 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
      * f1 -> "("
      * f2 -> Expression()
      * f3 -> ")"
-     * f4 -> ";"
      */
     public Base_t visit(PrintStatement n, Base_t argu) throws Exception { //is int
         n.f0.accept(this, argu);
         n.f1.accept(this, argu);
         Variable_t expr = (Variable_t) n.f2.accept(this, argu);
         n.f3.accept(this, argu);
-        n.f4.accept(this, argu);
         if (expr.getType() == null) {
             expr = findType(expr, (Method_t) argu);
         }
@@ -567,13 +560,11 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
      * f0 -> "System.out.println"
      * f1 -> "("
      * f2 -> ")"
-     * f3 -> ";"
      */
     public Base_t visit(PrintLineStatement n, Base_t argu) throws Exception { //is int
         n.f0.accept(this, argu);
         n.f1.accept(this, argu);
         n.f2.accept(this, argu);
-        n.f3.accept(this, argu);
         return null;
     }
 
@@ -582,7 +573,6 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
      * f1 -> "("
      * f2 -> Expression()
      * f3 -> ")"
-     * f4 -> ";"
      */
     public Base_t visit(AnswerStatement n, Base_t argu) throws Exception { //is int
         this.has_answer_ = true;
@@ -590,7 +580,6 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
         n.f1.accept(this, argu);
         Variable_t expr = (Variable_t) n.f2.accept(this, argu);
         n.f3.accept(this, argu);
-        n.f4.accept(this, argu);
         if (expr.getType() == null) {
             expr = findType(expr, (Method_t) argu);
         }

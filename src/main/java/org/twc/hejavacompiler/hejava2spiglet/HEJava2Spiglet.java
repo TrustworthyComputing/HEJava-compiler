@@ -374,7 +374,6 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
      * f0 -> Identifier()
      * f1 -> "="
      * f2 -> Expression()
-     * f3 -> ";"
      */
     public Base_t visit(AssignmentStatement n, Base_t argu) throws Exception {
         Variable_t identifier = (Variable_t) n.f0.accept(this, argu);
@@ -406,7 +405,6 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
     /**
      * f0 -> Identifier()
      * f1 -> "++"
-     * f2 -> ";"
      */
     public Base_t visit(IncrementAssignmentStatement n, Base_t argu) throws Exception {
         Variable_t identifier = (Variable_t) n.f0.accept(this, argu);
@@ -445,7 +443,6 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
     /**
      * f0 -> Identifier()
      * f1 -> "--"
-     * f2 -> ";"
      */
     public Base_t visit(DecrementAssignmentStatement n, Base_t argu) throws Exception {
         Variable_t identifier = (Variable_t) n.f0.accept(this, argu);
@@ -485,7 +482,6 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
      * f0 -> Identifier()
      * f1 -> CompoundOperator()
      * f2 -> Expression()
-     * f3 -> ";"
      */
     public Base_t visit(CompoundAssignmentStatement n, Base_t argu) throws Exception {
         Variable_t identifier = (Variable_t) n.f0.accept(this, argu);
@@ -568,7 +564,6 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
      * f3 -> "]"
      * f4 -> "="
      * f5 -> Expression()
-     * f6 -> ";"
      */
     public Base_t visit(ArrayAssignmentStatement n, Base_t argu) throws Exception {
         Variable_t identifier = (Variable_t) n.f0.accept(this, argu);
@@ -670,7 +665,6 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
      * f1 -> "("
      * f2 -> Expression()
      * f3 -> ")"
-     * f4 -> ";"
      */
     public Base_t visit(PrintStatement n, Base_t argu) throws Exception {
         String t = ((Variable_t) n.f2.accept(this, argu)).getRegister();
@@ -682,7 +676,6 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
      * f0 -> "System.out.println"
      * f1 -> "("
      * f2 -> ")"
-     * f3 -> ";"
      */
     public Base_t visit(PrintLineStatement n, Base_t argu) throws Exception {
         this.asm_.append("PRINT TEMP 0\n");
@@ -694,7 +687,6 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
      * f1 -> "("
      * f2 -> Expression()
      * f3 -> ")"
-     * f4 -> ";"
      */
     public Base_t visit(AnswerStatement n, Base_t argu) throws Exception {
         String t = ((Variable_t) n.f2.accept(this, argu)).getRegister();

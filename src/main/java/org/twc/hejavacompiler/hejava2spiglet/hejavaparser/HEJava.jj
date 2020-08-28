@@ -286,23 +286,23 @@ void Statement() :
 {
 	Block()
 | 	LOOKAHEAD(2)
-	AssignmentStatement()
+	AssignmentStatement() ";"
 | 	LOOKAHEAD(2)
-	IncrementAssignmentStatement()
+	IncrementAssignmentStatement() ";"
 | 	LOOKAHEAD(2)
-	DecrementAssignmentStatement()
+	DecrementAssignmentStatement() ";"
 | 	LOOKAHEAD(2)
-	CompoundAssignmentStatement()
+	CompoundAssignmentStatement() ";"
 | 	LOOKAHEAD(2)
-	ArrayAssignmentStatement()
+	ArrayAssignmentStatement() ";"
 | 	IfStatement()
 | 	WhileStatement()
 | 	ForStatement()
 | 	LOOKAHEAD(3)
-	PrintStatement()
+	PrintStatement() ";"
 | 	LOOKAHEAD(3)
-	PrintLineStatement()
-| 	AnswerStatement()
+	PrintLineStatement() ";"
+| 	AnswerStatement() ";"
 }
 
 void Block() :
@@ -314,26 +314,26 @@ void Block() :
 void AssignmentStatement() :
 {}
 {
-	Identifier() "=" Expression() ";"
+	Identifier() "=" Expression()
 }
 
 void IncrementAssignmentStatement() :
 {}
 {
-  Identifier() "++" ";"
+  Identifier() "++"
 }
 
 void DecrementAssignmentStatement() :
 {}
 {
-  Identifier() "--" ";"
+  Identifier() "--"
 }
 
 
 void CompoundAssignmentStatement() :
 {}
 {
-  Identifier() CompoundOperator() Expression() ";"
+  Identifier() CompoundOperator() Expression()
 }
 
 void CompoundOperator() :
@@ -354,7 +354,7 @@ void CompoundOperator() :
 void ArrayAssignmentStatement() :
 {}
 {
-	Identifier() "[" Expression() "]" "=" Expression() ";"
+	Identifier() "[" Expression() "]" "=" Expression()
 }
 
 void IfStatement() :
@@ -385,25 +385,25 @@ void WhileStatement() :
 void ForStatement() :
 {}
 {
-	"for" "(" Expression() ";" Expression() ";" Expression() ")" Statement()
+	"for" "(" VarDeclaration() Expression() ";" Expression() ")" Statement()
 }
 
 void PrintStatement() :
 {}
 {
-	<PRINT> "(" Expression() ")" ";"
+	<PRINT> "(" Expression() ")"
 }
 
 void PrintLineStatement() :
 {}
 {
-	<PRINT> "(" ")" ";"
+	<PRINT> "(" ")"
 }
 
 void AnswerStatement() :
 {}
 {
-	<ANSWER> "(" Expression() ")" ";"
+	<ANSWER> "(" Expression() ")"
 }
 
 void Expression() :
