@@ -183,13 +183,25 @@ void ClassExtendsDeclaration() :
 void VarDeclaration() :
 {}
 {
-	Type() Identifier() ( VarDeclarationRest() )* ";"
+	Type() Variable() ( VarDeclarationRest() )* ";"
+}
+
+void Variable() :
+{}
+{
+    Identifier() ( VarInit() )?
+}
+
+void VarInit() :
+{}
+{
+    "=" Expression()
 }
 
 void VarDeclarationRest() :
 {}
 {
-	"," Identifier()
+	"," Variable()
 }
 
 void MethodDeclaration() :

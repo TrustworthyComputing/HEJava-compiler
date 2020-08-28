@@ -145,34 +145,54 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
 
     /**
      * f0 -> Type()
-     * f1 -> Identifier()
+     * f1 -> Variable()
      * f2 -> ( VarDeclarationRest() )*
      * f3 -> ";"
      */
     public Base_t visit(VarDeclaration n, Base_t argu) throws Exception {
-        String vartype = ((Variable_t) n.f0.accept(this, argu)).getType();
-        String varname = ((Variable_t) n.f0.accept(this, argu)).getName();
-        if (n.f2.present()) {
-            List<String> vars = new ArrayList<>();
-            vars.add(varname);
-            for (int i = 0; i < n.f2.size(); i++) {
-                Variable_t var = (Variable_t) n.f2.nodes.get(i).accept(this, argu);
-                vars.add(var.getName());
-            }
-            return new Variable_t(vartype, vars);
-        } else {
-            return new Variable_t(vartype, varname);
+        String typedecl = ((Variable_t) n.f0.accept(this, argu)).getType();
+        String assigned_type = ((Variable_t) n.f1.accept(this, argu)).getType();
+        if (!typedecl.equals(assigned_type)) {
+            throw new Exception("Error in inline assignment. Different types: " + typedecl + " " + assigned_type);
         }
+        if (n.f2.present()) {
+            for (int i = 0; i < n.f2.size(); i++) {
+                assigned_type = ((Variable_t) n.f2.nodes.get(i).accept(this, argu)).getType();
+                if (!typedecl.equals(assigned_type)) {
+                    throw new Exception("Error in inline assignment. Different types: " + typedecl + " " + assigned_type);
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * f0 -> Identifier()
+     * f1 -> ( VarInit() )?
+     */
+    public Base_t visit(Variable n, Base_t argu) throws Exception {
+        String varname = n.f0.accept(this, argu).getName();
+        String varType = "";
+        if (n.f1.present()) {
+            varType = ((Variable_t) n.f1.accept(this, argu)).getType();
+        }
+        return new Variable_t(varType, varname);
+    }
+
+    /**
+     * f0 -> "="
+     * f1 -> Expression()
+     */
+    public Base_t visit(VarInit n, Base_t argu) throws Exception {
+        return n.f1.accept(this, argu);
     }
 
     /**
      * f0 -> ","
-     * f1 -> Identifier()
+     * f1 -> Variable()
      */
     public Base_t visit(VarDeclarationRest n, Base_t argu) throws Exception {
-        n.f0.accept(this, argu);
-        String varname = n.f1.accept(this, argu).getName();
-        return new Variable_t("", varname);
+        return new Variable_t(((Variable_t) n.f1.accept(this, argu)).getType(), n.f1.accept(this, argu).getName());
     }
     
     /**

@@ -255,7 +255,7 @@ public class SymbolTableVisitor extends GJNoArguDepthFirst<Base_t> {
 
     /**
      * f0 -> Type()
-     * f1 -> Identifier()
+     * f1 -> Variable()
      * f2 -> ( VarDeclarationRest() )*
      * f3 -> ";"
      */
@@ -276,8 +276,25 @@ public class SymbolTableVisitor extends GJNoArguDepthFirst<Base_t> {
     }
 
     /**
+     * f0 -> Identifier()
+     * f1 -> ( VarInit() )?
+     */
+    public Base_t visit(Variable n) throws Exception {
+        String varname = n.f0.accept(this).getName();
+        return new Variable_t("", varname);
+    }
+
+    /**
+     * f0 -> "="
+     * f1 -> Expression()
+     */
+    public Base_t visit(VarInit n) throws Exception {
+        return null;
+    }
+
+    /**
      * f0 -> ","
-     * f1 -> Identifier()
+     * f1 -> Variable()
      */
     public Base_t visit(VarDeclarationRest n) throws Exception {
         n.f0.accept(this);

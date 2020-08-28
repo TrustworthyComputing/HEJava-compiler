@@ -157,7 +157,7 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
 
     /**
      * f0 -> Type()
-     * f1 -> Identifier()
+     * f1 -> Variable()
      * f2 -> ( VarDeclarationRest() )*
      * f3 -> ";"
      */
@@ -171,24 +171,23 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
         if (n.f2.present()) {
             for (int i = 0; i < n.f2.size(); i++) {
                 Variable_t var = (Variable_t) n.f2.nodes.get(i).accept(this, argu);
-                vars.add(new Variable_t(varType, var.getName()));
+                vars.add(new Variable_t(varType, var.getName(), var.getRegister()));
             }
         }
 
         for (Variable_t var : vars) {
             String varName = var.getName();
-            System.out.println("loop " + varName);
             if (meth.getFrom_class_() != null) { // is a variable of a function
-                String newTemp = newTemp();
+                String tmp = (var.getRegister() == null) ? newTemp() : var.getRegister();
                 if ((meth = meth.getFrom_class_().getMethod(meth.getName())) != null) {
-                    meth.addRegToVar(varName, newTemp);
+                    meth.addRegToVar(varName, tmp);
                 } else {
                     throw new Exception("VarDeclaration Error 1");
                 }
-                if (varType != null && varType.equals("EncInt")) {
-                    //                this.asm_.append("E_CONST ").append(newTemp).append(" 0\n");
-                } else {
-                    this.asm_.append("MOVE ").append(newTemp).append(" 0\n");
+                if (var.getRegister() == null) {
+                    if (varType == null || !varType.equals("EncInt")) {
+                        this.asm_.append("MOVE ").append(tmp).append(" 0\n");
+                    }
                 }
             } else { // is a field of a class
                 Class_t cl = st_.get(meth.getName());
@@ -201,13 +200,32 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
     }
 
     /**
+     * f0 -> Identifier()
+     * f1 -> ( VarInit() )?
+     */
+    public Base_t visit(Variable n, Base_t argu) throws Exception {
+        String varname = n.f0.accept(this, argu).getName();
+        String reg = null;
+        if (n.f1.present()) {
+            reg = ((Variable_t) n.f1.accept(this, argu)).getRegister();
+        }
+        return new Variable_t("", varname, reg);
+    }
+
+    /**
+     * f0 -> "="
+     * f1 -> Expression()
+     */
+    public Base_t visit(VarInit n, Base_t argu) throws Exception {
+        return n.f1.accept(this, argu);
+    }
+
+    /**
      * f0 -> ","
-     * f1 -> Identifier()
+     * f1 -> Variable()
      */
     public Base_t visit(VarDeclarationRest n, Base_t argu) throws Exception {
-        n.f0.accept(this, argu);
-        String varname = n.f1.accept(this, argu).getName();
-        return new Variable_t("", varname);
+        return n.f1.accept(this, argu);
     }
 
     /**
