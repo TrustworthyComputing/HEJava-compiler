@@ -106,7 +106,6 @@ public class SymbolTableVisitor extends GJNoArguDepthFirst<Base_t> {
             for (int i = 0; i < n.f15.size(); i++) {
                 Variable_t var_from_for_statement = (Variable_t) n.f15.nodes.get(i).accept(this);
                 if (var_from_for_statement != null) {
-                    System.out.println("main :" + var_from_for_statement.getName());
                     if (!m.addVar(new Variable_t(var_from_for_statement.getType(), var_from_for_statement.getName()))) {
                         throw new Exception("Class " + classname + ": Variable " + var_from_for_statement.getName() + " already exists");
                     }
@@ -378,7 +377,6 @@ public class SymbolTableVisitor extends GJNoArguDepthFirst<Base_t> {
             for (int i = 0; i < n.f8.size(); i++) {
                 Variable_t var_from_for_statement = (Variable_t) n.f8.nodes.get(i).accept(this);
                 if (var_from_for_statement != null) {
-                    System.out.println("main :" + var_from_for_statement.getName());
                     if (!meth.addVar(new Variable_t(var_from_for_statement.getType(), var_from_for_statement.getName()))) {
                         throw new Exception("Class " + meth_name + ": Variable " + var_from_for_statement.getName() + " already exists");
                     }

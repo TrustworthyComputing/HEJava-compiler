@@ -350,7 +350,7 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
         t1 = findType(t1, (Method_t) argu);
         t2 = findType(t2, (Method_t) argu);
         // check for methods (extended or not) and for non-extended vars
-        if (t1.getType().equals(t2.getType())) {
+        if (t1.getType().equals(t2.getType()) || (t1.getType().equals("EncInt") && t2.getType().equals("int"))) {
             return null;
         }
         // now for extended vars
@@ -687,7 +687,7 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
         ) {
             if (t1.equals("int") && t2.equals("int")) {
                 return new Variable_t("int");
-            } else if (t1.equals("EncInt") && (t2.equals("int") || t2.equals("EncInt"))) {
+            } else if ((t1.equals("int") || t1.equals("EncInt")) && (t2.equals("int") || t2.equals("EncInt"))) {
                 return new Variable_t("EncInt");
             }
         } else if ("==".equals(operator) || "!=".equals(operator) || "<".equals(operator) || "<=".equals(operator) || ">".equals(operator) || ">=".equals(operator)) {
@@ -696,7 +696,8 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
             } else if (t1.equals("int") && t2.equals("int")) {
                 return new Variable_t("boolean");
             } else if (t1.equals("EncInt") && t2.equals("EncInt")) {
-// TODO
+                return new Variable_t("EncInt");
+            } else if (t1.equals("EncInt") && t2.equals("int") || t1.equals("int") && t2.equals("EncInt")) {
                 return new Variable_t("EncInt");
             }
         }

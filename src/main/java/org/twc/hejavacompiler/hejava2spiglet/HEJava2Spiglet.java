@@ -785,8 +785,10 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
     public Base_t visit(BinaryExpression n, Base_t argu) throws Exception {
         String ret = newTemp();
         String t1 = ((Variable_t) n.f0.accept(this, argu)).getRegister();
+        String t1_type = ((Variable_t) n.f0.accept(this, argu)).getType();
         String operator = n.f1.accept(this, argu).getName();
         String t2 = ((Variable_t) n.f2.accept(this, argu)).getRegister();
+        String t2_type = ((Variable_t) n.f2.accept(this, argu)).getType();
         String opcode;
         String binexpr_type = "int";
         if ("&".equals(operator)) {
@@ -831,6 +833,16 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
         if (vartype_.equals("EncInt") || vartype_.equals("EncInt[]")) {
             opcode = "E_" + opcode;
             binexpr_type = vartype_;
+            if (!t1_type.equals("EncInt")) { // if it's an operation between unencrypted and encrypted
+                String enc_temp_1 = newTemp();
+                this.asm_.append("E_CONST ").append(enc_temp_1).append(" ").append(t1).append("\n");
+                t1 = enc_temp_1;
+            }
+            if (!t2_type.equals("EncInt")) { // if it's an operation between unencrypted and encrypted
+                String enc_temp_2 = newTemp();
+                this.asm_.append("E_CONST ").append(enc_temp_2).append(" ").append(t2).append("\n");
+                t2 = enc_temp_2;
+            }
         }
         switch (opcode) {
             case "GT": {
