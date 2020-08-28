@@ -277,6 +277,20 @@ public class Kanga2asm extends GJNoArguDepthFirst<String> {
     }
 
     /**
+     * f0 -> "MUX"
+     * f1 -> Reg()
+     * f2 -> SimpleExp()
+     */
+    public String visit(MuxStmt n) throws Exception {
+        String res = n.f1.accept(this);
+        String cond = n.f2.accept(this);
+        String exp1 = n.f3.accept(this);
+        String exp2 = n.f4.accept(this);
+        asmPrinter_.println("mux " + res + ", " + cond + ", " + exp1 + ", " + exp2);
+        return null;
+    }
+
+    /**
      * f0 -> "ALOAD"
      * f1 -> Reg()
      * f2 -> SpilledArg()

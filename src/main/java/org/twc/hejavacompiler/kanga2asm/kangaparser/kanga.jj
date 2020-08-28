@@ -80,6 +80,7 @@ TOKEN :
 | < PRIVATE_READ: "SECREAD" >
 | < PUBLIC_SEEK: "PUBSEEK" >
 | < PRIVATE_SEEK: "SECSEEK" >
+| < MUX: "MUX" >
 | < BEGIN: "BEGIN" >
 | < RETURN: "RETURN" >
 | < JUMP : "JUMP" >
@@ -215,6 +216,7 @@ void Stmt() :
 | PrivateReadStmt()
 | PublicSeekStmt()
 | PrivateSeekStmt()
+| MuxStmt()
 | ALoadStmt()
 | AStoreStmt()
 | PassArgStmt()
@@ -311,6 +313,11 @@ void PrivateSeekStmt() :
   "SECSEEK" Reg() SimpleExp()
 }
 
+void MuxStmt() :
+{}
+{
+  "MUX" Reg() Reg() Reg() Reg()
+}
 
 void ALoadStmt() :
 {}

@@ -727,6 +727,7 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
         String operator = n.f1.accept(this, argu).getName();
         String t2 = ((Variable_t) n.f2.accept(this, argu)).getRegister();
         String opcode;
+        String binexpr_type = "int";
         if ("&".equals(operator)) {
             opcode = "AND";
         } else if ("|".equals(operator)) {
@@ -768,6 +769,7 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
         }
         if (vartype_.equals("EncInt") || vartype_.equals("EncInt[]")) {
             opcode = "E_" + opcode;
+            binexpr_type = vartype_;
         }
         switch (opcode) {
             case "GT": {
@@ -799,7 +801,7 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
                 break;
         }
         vartype_ = "int";
-        return new Variable_t(null, null, ret);
+        return new Variable_t(binexpr_type, null, ret);
     }
 
     /**
@@ -929,21 +931,33 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
      * f6 -> Expression()
      */
     public Base_t visit(TernaryExpression n, Base_t argu) throws Exception {
-        String else_label = this.newLabel();
-        String end_label = this.newLabel();
-        String res = newTemp();
-        String cond = ((Variable_t) n.f1.accept(this, argu)).getRegister();
-        this.asm_.append("CJUMP ").append(cond).append(" ").append(else_label).append("\n"); //if cond not true go to else_label
-        Variable_t exp1 = (Variable_t) n.f4.accept(this, argu);
-        String reg_if = exp1.getRegister();
-        String return_type = exp1.getType();
-        this.asm_.append("MOVE ").append(res).append(" ").append(reg_if).append("\n");
-        this.asm_.append("JUMP ").append(end_label).append("\n");
-        this.asm_.append(else_label).append(" NOOP\n");
-        String reg_else = ((Variable_t) n.f6.accept(this, argu)).getRegister();
-        this.asm_.append("MOVE ").append(res).append(" ").append(reg_else).append("\n");
-        this.asm_.append(end_label).append(" NOOP\n");
-        return new Variable_t(return_type, null, res);
+        Variable_t cond_expr = ((Variable_t) n.f1.accept(this, argu));
+        if (cond_expr.getType().equals("EncInt")) {
+            vartype_ = "EncInt";
+            String res = newTemp();
+            String cond_reg = cond_expr.getRegister();
+            String reg_if = ((Variable_t) n.f4.accept(this, argu)).getRegister();
+            String reg_else = ((Variable_t) n.f6.accept(this, argu)).getRegister();
+            this.asm_.append("MUX ").append(res).append(" ").append(cond_reg).append(" ").append(reg_if).append(" ").append(reg_else).append("\n");
+            vartype_ = "int";
+            return new Variable_t("EncInt", null, res);
+        } else {
+            String else_label = this.newLabel();
+            String end_label = this.newLabel();
+            String res = newTemp();
+            String cond_reg = cond_expr.getRegister();
+            this.asm_.append("CJUMP ").append(cond_reg).append(" ").append(else_label).append("\n"); //if cond not true go to else_label
+            Variable_t exp1 = (Variable_t) n.f4.accept(this, argu);
+            String reg_if = exp1.getRegister();
+            String return_type = exp1.getType();
+            this.asm_.append("MOVE ").append(res).append(" ").append(reg_if).append("\n");
+            this.asm_.append("JUMP ").append(end_label).append("\n");
+            this.asm_.append(else_label).append(" NOOP\n");
+            String reg_else = ((Variable_t) n.f6.accept(this, argu)).getRegister();
+            this.asm_.append("MOVE ").append(res).append(" ").append(reg_else).append("\n");
+            this.asm_.append(end_label).append(" NOOP\n");
+            return new Variable_t(return_type, null, res);
+        }
     }
 
     /**

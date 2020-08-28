@@ -333,6 +333,26 @@ public class FactGeneratorVisitor extends GJDepthFirst<String, String> {
     }
 
     /**
+     * f0 -> "MUX"
+     * f1 -> Temp()
+     * f2 -> Temp()
+     * f3 -> Temp()
+     * f4 -> Temp()
+     */
+    public String visit(MuxStmt n, String argu) throws Exception {
+        String dst = n.f1.accept(this, argu);
+        String cond = n.f2.accept(this, argu);
+        String src1 = n.f3.accept(this, argu);
+        String src2 = n.f4.accept(this, argu);
+        String op = "MUX " + dst + ", " + cond + ", " + src1 + ", " + src2;
+        var_defs_.add(new VarDefType(argu, this.inst_num2_, dst));
+        var_uses_.add(new VarUseType(argu, this.inst_num2_, cond));
+        var_uses_.add(new VarUseType(argu, this.inst_num2_, src1));
+        var_uses_.add(new VarUseType(argu, this.inst_num2_, src2));
+        return op;
+    }
+
+    /**
      * f0 -> Call()
      * | HAllocate()
      * | BinOp()

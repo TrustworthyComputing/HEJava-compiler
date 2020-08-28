@@ -307,6 +307,23 @@ public class OptimizerVisitor extends GJDepthFirst<OptimizationWrapper, String> 
     }
 
     /**
+     * f0 -> "MUX"
+     * f1 -> Temp()
+     * f2 -> Temp()
+     * f3 -> Temp()
+     * f4 -> Temp()
+     */
+    public OptimizationWrapper visit(MuxStmt n, String argu) throws Exception {
+        String dst = n.f1.accept(this, argu).getInstr_or_temp_();
+        String cond = n.f2.accept(this, argu).getOptimizedTemp();
+        String src1 = n.f3.accept(this, argu).getOptimizedTemp();
+        String src2 = n.f4.accept(this, argu).getOptimizedTemp();
+        String instr = "MUX " + dst + " " + cond + " " + src1 + " " + src2 + "\n";
+        checkIfDeadCode(argu, instr);
+        return new OptimizationWrapper(instr);
+    }
+
+    /**
      * f0 -> Call()
      * | HAllocate()
      * | BinOp()

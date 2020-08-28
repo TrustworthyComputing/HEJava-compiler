@@ -801,8 +801,16 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
                 return new Variable_t(expr_1.getType(), null);
             }
             throw new Exception("Ternary types mismatch: " + expr_1.getType() + " " + expr_2.getType());
+        } else if (expr.getType().equals("EncInt")) {
+            if (expr_1.getType().equals(expr_2.getType()) || (
+                expr_1.getType().equals("int") || expr_1.getType().equals("EncInt") &&
+                expr_2.getType().equals("int") || expr_2.getType().equals("EncInt"))
+            ) {
+                return new Variable_t("EncInt", null);
+            }
+            throw new Exception("Ternary types mismatch: " + expr_1.getType() + " " + expr_2.getType());
         }
-        throw new Exception("If-condition is not a boolean Expression");
+        throw new Exception("If-condition is not a boolean Expression " + expr.getType());
     }
 
     /**

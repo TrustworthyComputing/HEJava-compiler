@@ -83,6 +83,7 @@ TOKEN :
 | < PRIVATE_READ: "SECREAD" >
 | < PUBLIC_SEEK: "PUBSEEK" >
 | < PRIVATE_SEEK: "SECSEEK" >
+| < MUX: "MUX" >
 | < ANSWER: "ANSWER" >
 | < BEGIN: "BEGIN" >
 | < RETURN: "RETURN" >
@@ -184,6 +185,7 @@ void Stmt() :
 | PrivateReadStmt()
 | PublicSeekStmt()
 | PrivateSeekStmt()
+| MuxStmt()
 }
 
 void NoOpStmt() :
@@ -274,6 +276,12 @@ void PrivateSeekStmt() :
 {}
 {
   "SECSEEK" Temp() SimpleExp()
+}
+
+void MuxStmt() :
+{}
+{
+  "MUX" Temp() Temp() Temp() Temp()
 }
 
 void Exp():

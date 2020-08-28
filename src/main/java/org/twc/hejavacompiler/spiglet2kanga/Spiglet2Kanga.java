@@ -265,6 +265,19 @@ public class Spiglet2Kanga extends GJNoArguDepthFirst<String> {
     }
 
     /**
+     * f0 -> "MUX"
+     * f1 -> Temp()
+     * f2 -> Temp()
+     * f3 -> Temp()
+     * f4 -> Temp()
+     */
+    public String visit(MuxStmt n) throws Exception {
+        asm_.append("\t\tMUX ").append(temp2Reg("", n.f1.accept(this))).append(" ").append(temp2Reg("", n.f2.accept(this)))
+            .append(" ").append(temp2Reg("", n.f3.accept(this))).append(" ").append(temp2Reg("", n.f4.accept(this))).append("\n");
+        return null;
+    }
+
+    /**
      * f0 -> Call()
      * | HAllocate()
      * | BinOp()

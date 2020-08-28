@@ -69,6 +69,7 @@ public class GetFlowGraph extends GJNoArguDepthFirst<String> {
      * | PrivateReadStmt()
      * | PublicSeekStmt()
      * | PrivateSeekStmt()
+     * | MuxStmt()
      */
     public String visit(Stmt n) throws Exception {
         currVertex = currMethod.flowGraph.getVertex(vid);
@@ -266,6 +267,23 @@ public class GetFlowGraph extends GJNoArguDepthFirst<String> {
         currVertex.Def.add(Integer.parseInt(n.f1.accept(this)));
         currMethod.flowGraph.addEdge(vid, vid + 1);
         n.f2.accept(this);
+        return null;
+    }
+
+    /**
+     * f0 -> "MuxStmt"
+     * f1 -> Temp()
+     * f2 -> Temp()
+     * f3 -> Temp()
+     * f4 -> Temp()
+     */
+    public String visit(MuxStmt n) throws Exception {
+        // Temp Def
+        currVertex.Def.add(Integer.parseInt(n.f1.accept(this)));
+        currVertex.Use.add(Integer.parseInt(n.f2.accept(this)));
+        currVertex.Use.add(Integer.parseInt(n.f3.accept(this)));
+        currVertex.Use.add(Integer.parseInt(n.f4.accept(this)));
+        currMethod.flowGraph.addEdge(vid, vid + 1);
         return null;
     }
 
