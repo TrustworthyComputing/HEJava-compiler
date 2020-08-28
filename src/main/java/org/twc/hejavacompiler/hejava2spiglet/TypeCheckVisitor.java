@@ -4,6 +4,8 @@ import org.twc.hejavacompiler.hejava2spiglet.hejavasyntaxtree.*;
 import org.twc.hejavacompiler.hejava2spiglet.hejavavisitor.GJDepthFirst;
 import org.twc.hejavacompiler.basetype.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
@@ -144,13 +146,35 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
     /**
      * f0 -> Type()
      * f1 -> Identifier()
-     * f2 -> ";"
+     * f2 -> ( VarDeclarationRest() )*
+     * f3 -> ";"
      */
     public Base_t visit(VarDeclaration n, Base_t argu) throws Exception {
-        n.f2.accept(this, argu);
-        return new Variable_t(((Variable_t) n.f0.accept(this, argu)).getType(), n.f1.accept(this, argu).getName());
+        String vartype = ((Variable_t) n.f0.accept(this, argu)).getType();
+        String varname = ((Variable_t) n.f0.accept(this, argu)).getName();
+        if (n.f2.present()) {
+            List<String> vars = new ArrayList<>();
+            vars.add(varname);
+            for (int i = 0; i < n.f2.size(); i++) {
+                Variable_t var = (Variable_t) n.f2.nodes.get(i).accept(this, argu);
+                vars.add(var.getName());
+            }
+            return new Variable_t(vartype, vars);
+        } else {
+            return new Variable_t(vartype, varname);
+        }
     }
 
+    /**
+     * f0 -> ","
+     * f1 -> Identifier()
+     */
+    public Base_t visit(VarDeclarationRest n, Base_t argu) throws Exception {
+        n.f0.accept(this, argu);
+        String varname = n.f1.accept(this, argu).getName();
+        return new Variable_t("", varname);
+    }
+    
     /**
      * f0 -> "public"
      * f1 -> Type()
@@ -233,7 +257,7 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
      * f2 -> "]"
      */
     public Base_t visit(ArrayType n, Base_t argu) throws Exception {
-        return new Variable_t("int[]", null);
+        return new Variable_t("int[]");
     }
 
     /**
@@ -242,28 +266,28 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
      * f2 -> "]"
      */
     public Base_t visit(EncryptedArrayType n, Base_t argu) throws Exception {
-        return new Variable_t("EncInt[]", null);
+        return new Variable_t("EncInt[]");
     }
 
     /**
      * f0 -> "boolean"
      */
     public Base_t visit(BooleanType n, Base_t argu) throws Exception {
-        return new Variable_t("boolean", null);
+        return new Variable_t("boolean");
     }
 
     /**
      * f0 -> "int"
      */
     public Base_t visit(IntegerType n, Base_t argu) throws Exception {
-        return new Variable_t("int", null);
+        return new Variable_t("int");
     }
 
     /**
      * f0 -> "EncInt"
      */
     public Base_t visit(EncryptedIntegerType n, Base_t argu) throws Exception {
-        return new Variable_t("EncInt", null);
+        return new Variable_t("EncInt");
     }
 
     /**
@@ -587,7 +611,7 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
         String t1 = findType(clause_1, (Method_t) argu).getType();
         String t2 = findType(clause_2, (Method_t) argu).getType();
         if (t1.equals("boolean") && t2.equals("boolean")) {
-            return new Variable_t("boolean", null);
+            return new Variable_t("boolean");
         }
         throw new Exception("Bad operand types for operator '&&': " + t1 + " " + t2);
     }
@@ -604,7 +628,7 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
         String t1 = findType(clause_1, (Method_t) argu).getType();
         String t2 = findType(clause_2, (Method_t) argu).getType();
         if (t1.equals("boolean") && t2.equals("boolean")) {
-            return new Variable_t("boolean", null);
+            return new Variable_t("boolean");
         }
         throw new Exception("Bad operand types for operator '||': " + t1 + " " + t2);
     }
@@ -624,18 +648,18 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
                 || "+".equals(operator) || "-".equals(operator) || "*".equals(operator) || "/".equals(operator) || "%".equals(operator)
         ) {
             if (t1.equals("int") && t2.equals("int")) {
-                return new Variable_t("int", null);
+                return new Variable_t("int");
             } else if (t1.equals("EncInt") && (t2.equals("int") || t2.equals("EncInt"))) {
-                return new Variable_t("EncInt", null);
+                return new Variable_t("EncInt");
             }
         } else if ("==".equals(operator) || "!=".equals(operator) || "<".equals(operator) || "<=".equals(operator) || ">".equals(operator) || ">=".equals(operator)) {
             if (t1.equals("boolean") && t2.equals("boolean")) {
-                return new Variable_t("boolean", null);
+                return new Variable_t("boolean");
             } else if (t1.equals("int") && t2.equals("int")) {
-                return new Variable_t("boolean", null);
+                return new Variable_t("boolean");
             } else if (t1.equals("EncInt") && t2.equals("EncInt")) {
 // TODO
-                return new Variable_t("EncInt", null);
+                return new Variable_t("EncInt");
             }
         }
         throw new Exception("Bad operand types for operator '" + operator + "': " + t1 + " " + t2);
@@ -681,9 +705,9 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
         Variable_t clause_1 = (Variable_t) n.f1.accept(this, argu);
         String t1 = findType(clause_1, (Method_t) argu).getType();
         if (t1.equals("int")) {
-            return new Variable_t("int", null);
+            return new Variable_t("int");
         } else if (t1.equals("EncInt")) {
-            return new Variable_t("EncInt", null);
+            return new Variable_t("EncInt");
         }
         throw new Exception("Bad operand type for operator '~': " + t1);
     }
@@ -701,9 +725,9 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
         array = findType(array, (Method_t) argu);
         idx = findType(idx, (Method_t) argu);
         if (array.getType().equals("int[]") && idx.getType().equals("int")) {
-            return new Variable_t("int", null);
+            return new Variable_t("int");
         } else if (array.getType().equals("EncInt[]") && idx.getType().equals("int")) {
-            return new Variable_t("EncInt", null);
+            return new Variable_t("EncInt");
         }
         throw new Exception("ArrayLookup between different types: " + array.getType() + " " + idx.getType());
     }
@@ -717,7 +741,7 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
         Variable_t t1 = (Variable_t) n.f0.accept(this, argu);
         t1 = findType(t1, (Method_t) argu);
         if (t1.getType().equals("int[]") || t1.getType().equals("EncInt[]")) {
-            return new Variable_t("int", null);
+            return new Variable_t("int");
         }
         throw new Exception("ArrayLength in something not int[] or EncInt[]: " + t1.getType());
     }
@@ -768,7 +792,7 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
                 }
             }
         }
-        return new Variable_t(existingmeth.getType_(), null);
+        return new Variable_t(existingmeth.getType_());
     }
 
     /**
@@ -798,7 +822,7 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
         }
         if (expr.getType().equals("boolean")) {
             if (expr_1.getType().equals(expr_2.getType())) {
-                return new Variable_t(expr_1.getType(), null);
+                return new Variable_t(expr_1.getType());
             }
             throw new Exception("Ternary types mismatch: " + expr_1.getType() + " " + expr_2.getType());
         } else if (expr.getType().equals("EncInt")) {
@@ -806,7 +830,7 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
                 expr_1.getType().equals("int") || expr_1.getType().equals("EncInt") &&
                 expr_2.getType().equals("int") || expr_2.getType().equals("EncInt"))
             ) {
-                return new Variable_t("EncInt", null);
+                return new Variable_t("EncInt");
             }
             throw new Exception("Ternary types mismatch: " + expr_1.getType() + " " + expr_2.getType());
         }
@@ -819,7 +843,7 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
      * f2 -> ")"
      */
     public Base_t visit(PublicReadExpression n, Base_t argu) throws Exception {
-        return new Variable_t("int", null);
+        return new Variable_t("int");
     }
 
     /**
@@ -828,7 +852,7 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
      * f2 -> ")"
      */
     public Base_t visit(PrivateReadExpression n, Base_t argu) throws Exception {
-        return new Variable_t("EncInt", null);
+        return new Variable_t("EncInt");
     }
 
     /**
@@ -840,7 +864,7 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
     public Base_t visit(PublicSeekExpression n, Base_t argu) throws Exception {
         String type = findType((Variable_t) n.f2.accept(this, argu), (Method_t) argu).getType();
         if (type.equals("int")) {
-            return new Variable_t("int", null);
+            return new Variable_t("int");
         }
         throw new Exception("Seek statement index should be integer");
     }
@@ -854,7 +878,7 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
     public Base_t visit(PrivateSeekExpression n, Base_t argu) throws Exception {
         String type = findType((Variable_t) n.f2.accept(this, argu), (Method_t) argu).getType();
         if (type.equals("int")) {
-            return new Variable_t("EncInt", null);
+            return new Variable_t("EncInt");
         }
         throw new Exception("Seek statement index should be integer");
     }
@@ -920,21 +944,21 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
      * f0 -> <INTEGER_LITERAL>
      */
     public Base_t visit(IntegerLiteral n, Base_t argu) throws Exception {
-        return new Variable_t("int", null);
+        return new Variable_t("int");
     }
 
     /**
      * f0 -> "true"
      */
     public Base_t visit(TrueLiteral n, Base_t argu) throws Exception {
-        return new Variable_t("boolean", null);
+        return new Variable_t("boolean");
     }
 
     /**
      * f0 -> "false"
      */
     public Base_t visit(FalseLiteral n, Base_t argu) throws Exception {
-        return new Variable_t("boolean", null);
+        return new Variable_t("boolean");
     }
 
     /**
@@ -949,7 +973,7 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
      */
     public Base_t visit(ThisExpression n, Base_t argu) throws Exception {
         n.f0.accept(this, argu);
-        return new Variable_t(((Method_t) argu).getFrom_class_().getName(), null);
+        return new Variable_t(((Method_t) argu).getFrom_class_().getName());
     }
 
     /**
@@ -969,7 +993,7 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
             throw new Exception("Error: new int[" + t.getType() + "], " + t.getType() + " should be int");
         }
         n.f4.accept(this, argu);
-        return new Variable_t("int[]", null);
+        return new Variable_t("int[]");
     }
 
     /**
@@ -989,7 +1013,7 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
             throw new Exception("Error: new EncInt[" + t.getType() + "], " + t.getType() + " should be int");
         }
         n.f4.accept(this, argu);
-        return new Variable_t("EncInt[]", null);
+        return new Variable_t("EncInt[]");
     }
 
     /**
@@ -1000,7 +1024,7 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
      */
     public Base_t visit(AllocationExpression n, Base_t argu) throws Exception {
         n.f0.accept(this, argu);
-        Variable_t classname = new Variable_t(n.f1.accept(this, argu).getName(), null);
+        Variable_t classname = new Variable_t(n.f1.accept(this, argu).getName());
         n.f2.accept(this, argu);
         n.f3.accept(this, argu);
         // if class does not exist
@@ -1019,7 +1043,7 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
         Variable_t t = (Variable_t) n.f1.accept(this, argu);
         t = findType(t, (Method_t) argu);
         if (t.getType().equals("boolean")) {
-            return new Variable_t("boolean", null);
+            return new Variable_t("boolean");
         }
         throw new Exception("Error: Not Clause, " + t + " type_ given. Can apply only to boolean");
     }

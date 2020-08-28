@@ -62,6 +62,7 @@ TOKEN :
 	| < FALSE: "false" >
 	| < IF: "if" >
 	| < WHILE: "while" >
+	| < FOR: "for" >
 	| < INTEGER: "int" >
 	| < ENCRYPTED_INTEGER: "EncInt" >
 	| < LENGTH: "length" >
@@ -182,7 +183,13 @@ void ClassExtendsDeclaration() :
 void VarDeclaration() :
 {}
 {
-	Type() Identifier() ";"
+	Type() Identifier() ( VarDeclarationRest() )* ";"
+}
+
+void VarDeclarationRest() :
+{}
+{
+	"," Identifier()
 }
 
 void MethodDeclaration() :
@@ -278,6 +285,7 @@ void Statement() :
 	ArrayAssignmentStatement()
 | 	IfStatement()
 | 	WhileStatement()
+| 	ForStatement()
 | 	LOOKAHEAD(3)
 	PrintStatement()
 | 	LOOKAHEAD(3)
@@ -360,6 +368,12 @@ void WhileStatement() :
 {}
 {
 	"while" "(" Expression() ")" Statement()
+}
+
+void ForStatement() :
+{}
+{
+	"for" "(" Expression() ";" Expression() ";" Expression() ")" Statement()
 }
 
 void PrintStatement() :

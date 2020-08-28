@@ -158,31 +158,56 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
     /**
      * f0 -> Type()
      * f1 -> Identifier()
-     * f2 -> ";"
+     * f2 -> ( VarDeclarationRest() )*
+     * f3 -> ";"
      */
     public Base_t visit(VarDeclaration n, Base_t argu) throws Exception {
         Method_t meth = (Method_t) argu;
         String varType = ((Variable_t) n.f0.accept(this, argu)).getType();
-        String varName = n.f1.f0.toString();
-        if (meth.getFrom_class_() != null) { // is a variable of a function
-            String newTemp = newTemp();
-            if ((meth = meth.getFrom_class_().getMethod(meth.getName())) != null) {
-                meth.addRegToVar(varName, newTemp);
-            } else {
-                throw new Exception("VarDeclaration Error 1");
+        Variable_t first_var = (Variable_t) n.f1.accept(this, argu);
+
+        List<Variable_t> vars = new ArrayList<>();
+        vars.add(first_var);
+        if (n.f2.present()) {
+            for (int i = 0; i < n.f2.size(); i++) {
+                Variable_t var = (Variable_t) n.f2.nodes.get(i).accept(this, argu);
+                vars.add(new Variable_t(varType, var.getName()));
             }
-            if (varType != null && varType.equals("EncInt")) {
-//                this.asm_.append("E_CONST ").append(newTemp).append(" 0\n");
-            } else {
-                this.asm_.append("MOVE ").append(newTemp).append(" 0\n");
-            }
-        } else { // is a field of a class
-            Class_t cl = st_.get(meth.getName());
-            if (cl == null) {
-                throw new Exception("VarDeclaration Error 2");
+        }
+
+        for (Variable_t var : vars) {
+            String varName = var.getName();
+            System.out.println("loop " + varName);
+            if (meth.getFrom_class_() != null) { // is a variable of a function
+                String newTemp = newTemp();
+                if ((meth = meth.getFrom_class_().getMethod(meth.getName())) != null) {
+                    meth.addRegToVar(varName, newTemp);
+                } else {
+                    throw new Exception("VarDeclaration Error 1");
+                }
+                if (varType != null && varType.equals("EncInt")) {
+                    //                this.asm_.append("E_CONST ").append(newTemp).append(" 0\n");
+                } else {
+                    this.asm_.append("MOVE ").append(newTemp).append(" 0\n");
+                }
+            } else { // is a field of a class
+                Class_t cl = st_.get(meth.getName());
+                if (cl == null) {
+                    throw new Exception("VarDeclaration Error 2");
+                }
             }
         }
         return null;
+    }
+
+    /**
+     * f0 -> ","
+     * f1 -> Identifier()
+     */
+    public Base_t visit(VarDeclarationRest n, Base_t argu) throws Exception {
+        n.f0.accept(this, argu);
+        String varname = n.f1.accept(this, argu).getName();
+        return new Variable_t("", varname);
     }
 
     /**
@@ -266,7 +291,7 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
      * f2 -> "]"
      */
     public Base_t visit(ArrayType n, Base_t argu) throws Exception {
-        return new Variable_t("int[]", null);
+        return new Variable_t("int[]");
     }
 
     /**
@@ -275,28 +300,28 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
      * f2 -> "]"
      */
     public Base_t visit(EncryptedArrayType n, Base_t argu) throws Exception {
-        return new Variable_t("EncInt[]", null);
+        return new Variable_t("EncInt[]");
     }
 
     /**
      * f0 -> "boolean"
      */
     public Base_t visit(BooleanType n, Base_t argu) throws Exception {
-        return new Variable_t("boolean", null);
+        return new Variable_t("boolean");
     }
 
     /**
      * f0 -> "int"
      */
     public Base_t visit(IntegerType n, Base_t argu) throws Exception {
-        return new Variable_t("int", null);
+        return new Variable_t("int");
     }
 
     /**
      * f0 -> "EncInt"
      */
     public Base_t visit(EncryptedIntegerType n, Base_t argu) throws Exception {
-        return new Variable_t("EncInt", null);
+        return new Variable_t("EncInt");
     }
 
 
@@ -554,7 +579,7 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
         String expr = ((Variable_t) n.f5.accept(this, argu)).getRegister();
         this.asm_.append("HSTORE ").append(temp_array).append(" 0 ").append(expr).append("\n");
         vartype_ = "int";
-        return new Variable_t(temp_array, null);
+        return new Variable_t(temp_array);
     }
 
     /**
