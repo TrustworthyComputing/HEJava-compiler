@@ -162,20 +162,23 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
      * f3 -> ";"
      */
     public Base_t visit(VarDeclaration n, Base_t argu) throws Exception {
+        String prev_var_type = vartype_;
         Method_t meth = (Method_t) argu;
-        String varType = ((Variable_t) n.f0.accept(this, argu)).getType();
+        vartype_ = ((Variable_t) n.f0.accept(this, argu)).getType();
         Variable_t first_var = (Variable_t) n.f1.accept(this, argu);
 
         List<Variable_t> vars = new ArrayList<>();
-        vars.add(first_var);
+        vars.add(new Variable_t(vartype_, first_var.getName(), first_var.getRegister()));
         if (n.f2.present()) {
             for (int i = 0; i < n.f2.size(); i++) {
                 Variable_t var = (Variable_t) n.f2.nodes.get(i).accept(this, argu);
-                vars.add(new Variable_t(varType, var.getName(), var.getRegister()));
+                vars.add(new Variable_t(vartype_, var.getName(), var.getRegister()));
             }
         }
 
         for (Variable_t var : vars) {
+            var.printVarDetails();
+
             String varName = var.getName();
             if (meth.getFrom_class_() != null) { // is a variable of a function
                 String tmp = (var.getRegister() == null) ? newTemp() : var.getRegister();
@@ -185,8 +188,10 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
                     throw new Exception("VarDeclaration Error 1");
                 }
                 if (var.getRegister() == null) {
-                    if (varType == null || !varType.equals("EncInt")) {
+                    if (vartype_ == null || !vartype_.equals("EncInt")) {
                         this.asm_.append("MOVE ").append(tmp).append(" 0\n");
+                    } else {
+                        this.asm_.append("E_CONST ").append(tmp).append(" 0\n");
                     }
                 }
             } else { // is a field of a class
@@ -196,6 +201,7 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
                 }
             }
         }
+        vartype_ = prev_var_type;
         return null;
     }
 
@@ -485,11 +491,14 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
      * f2 -> Expression()
      */
     public Base_t visit(CompoundAssignmentStatement n, Base_t argu) throws Exception {
+        String prev_var_type = vartype_;
         Variable_t identifier = (Variable_t) n.f0.accept(this, argu);
-        String id = identifier.getName();
         vartype_ = identifier.getType();
         String operator = n.f1.accept(this, argu).getName();
-        String expr = ((Variable_t) n.f2.accept(this, argu)).getRegister();
+        Variable_t v2 = (Variable_t) n.f2.accept(this, argu);
+        String id = identifier.getName();
+        String expr = v2.getRegister();
+        String t2_type = v2.getType();
         String opcode;
         if ("+=".equals(operator)) {
             opcode = "PLUS";
@@ -516,6 +525,11 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
         }
         if (vartype_.equals("EncInt") || vartype_.equals("EncInt[]")) {
             opcode = "E_" + opcode;
+            if (!t2_type.equals("EncInt")) { // if it's an operation between unencrypted and encrypted
+                String enc_temp_2 = newTemp();
+                this.asm_.append("E_CONST ").append(enc_temp_2).append(" ").append(expr).append("\n");
+                expr = enc_temp_2;
+            }
         }
         Method_t meth = (Method_t) argu;
         if (meth != null) {
@@ -537,7 +551,7 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
                 this.asm_.append("MOVE ").append(var.getRegister()).append(" ").append(opcode).append(" ").append(var.getRegister()).append(" ").append(expr).append("\n");
             }
         }
-        vartype_ = "int";
+        vartype_ = prev_var_type;
         return null;
     }
 
@@ -783,12 +797,15 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
      * f2 -> PrimaryExpression()
      */
     public Base_t visit(BinaryExpression n, Base_t argu) throws Exception {
-        String ret = newTemp();
-        String t1 = ((Variable_t) n.f0.accept(this, argu)).getRegister();
-        String t1_type = ((Variable_t) n.f0.accept(this, argu)).getType();
+        String prev_var_type = vartype_;
+        Variable_t v1 = (Variable_t) n.f0.accept(this, argu);
         String operator = n.f1.accept(this, argu).getName();
-        String t2 = ((Variable_t) n.f2.accept(this, argu)).getRegister();
-        String t2_type = ((Variable_t) n.f2.accept(this, argu)).getType();
+        Variable_t v2 = (Variable_t) n.f2.accept(this, argu);
+        String ret = newTemp();
+        String t1 = v1.getRegister();
+        String t1_type = v1.getType();
+        String t2 = v2.getRegister();
+        String t2_type = v2.getType();
         String opcode;
         String binexpr_type = "int";
         if ("&".equals(operator)) {
@@ -873,7 +890,7 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
                 this.asm_.append("MOVE ").append(ret).append(" ").append(opcode).append(" ").append(t1).append(" ").append(t2).append("\n");
                 break;
         }
-        vartype_ = "int";
+        vartype_ = prev_var_type;
         return new Variable_t(binexpr_type, null, ret);
     }
 
@@ -1149,7 +1166,7 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
         } else {
             this.asm_.append("MOVE ").append(ret).append(" ").append(n.f0.toString()).append("\n");
         }
-        return new Variable_t(null, null, ret);
+        return new Variable_t(vartype_, null, ret);
     }
 
     /**

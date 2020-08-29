@@ -153,13 +153,17 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
         String typedecl = ((Variable_t) n.f0.accept(this, argu)).getType();
         String assigned_type = ((Variable_t) n.f1.accept(this, argu)).getType();
         if (assigned_type != null && !typedecl.equals(assigned_type)) {
-            throw new Exception("Error in inline assignment. Different types: " + typedecl + " " + assigned_type);
+            if (!typedecl.equals("EncInt") || !assigned_type.equals("int")) {
+                throw new Exception("Error in inline assignment. Different types: " + typedecl + " " + assigned_type);
+            }
         }
         if (n.f2.present()) {
             for (int i = 0; i < n.f2.size(); i++) {
                 assigned_type = ((Variable_t) n.f2.nodes.get(i).accept(this, argu)).getType();
                 if (assigned_type != null && !typedecl.equals(assigned_type)) {
-                    throw new Exception("Error in inline assignment. Different types: " + typedecl + " " + assigned_type);
+                    if (!typedecl.equals("EncInt") || !assigned_type.equals("int")) {
+                        throw new Exception("Error in inline assignment. Different types: " + typedecl + " " + assigned_type);
+                    }
                 }
             }
         }
