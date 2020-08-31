@@ -177,8 +177,6 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
         }
 
         for (Variable_t var : vars) {
-            var.printVarDetails();
-
             String varName = var.getName();
             if (meth.getFrom_class_() != null) { // is a variable of a function
                 String tmp = (var.getRegister() == null) ? newTemp() : var.getRegister();
@@ -583,7 +581,6 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
     public Base_t visit(ArrayAssignmentStatement n, Base_t argu) throws Exception {
         Variable_t identifier = (Variable_t) n.f0.accept(this, argu);
         vartype_ = (identifier.getType().equals("int[]")) ? "int" : "EncInt";
-        System.out.println("ArrayAssignmentStatement " + vartype_ );
         String length = newTemp();
         String cond = newTemp();
         this.may_has_error_ = true;
