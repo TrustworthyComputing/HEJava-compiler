@@ -254,6 +254,7 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
         n.f7.accept(this, meth);
         n.f8.accept(this, meth);
         Variable_t retType = (Variable_t) n.f10.accept(this, meth);
+        this.asm_.append("Runtime_Error NOOP\n");
         this.asm_.append("RETURN ").append(retType.getRegister()).append("\nEND\n");
         return null;
     }

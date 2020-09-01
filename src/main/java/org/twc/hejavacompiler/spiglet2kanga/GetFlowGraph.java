@@ -121,8 +121,10 @@ public class GetFlowGraph extends GJNoArguDepthFirst<String> {
         // Temp Use
         int tempNo = Integer.parseInt(n.f1.accept(this));
         currVertex.Use.add(tempNo);
-        int jumpVid = mLabel.get(n.f2.accept(this));
+        String label = n.f2.accept(this);
+        int jumpVid = mLabel.get(label);
         currMethod.flowGraph.addEdge(vid, vid + 1);
+        if (label.equals("Runtime_Error")) return null;
         currMethod.flowGraph.addEdge(vid, jumpVid);
         return null;
     }

@@ -20,6 +20,7 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
 
     public static Variable_t findType(Variable_t var, Method_t meth) throws Exception {
         if (var.getType() == null) {
+            assert meth != null;
             String inMethod = meth.methContains(var.getName());
             if (inMethod == null) {   // if not found in the function, we should seek in the class
                 Variable_t inclassvar = meth.getFrom_class_().classContainsVar(var.getName());
@@ -85,7 +86,7 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
         n.f11.accept(this, argu);
         n.f12.accept(this, argu);
         n.f13.accept(this, argu);
-        n.f14.accept(this, argu);
+        n.f14.accept(this, meth);
         n.f15.accept(this, meth);
         n.f16.accept(this, argu);
         n.f17.accept(this, argu);
@@ -150,7 +151,11 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
      * f3 -> ";"
      */
     public Base_t visit(VarDeclaration n, Base_t argu) throws Exception {
-        String typedecl = ((Variable_t) n.f0.accept(this, argu)).getType();
+        Variable_t type = (Variable_t) n.f0.accept(this, argu);
+        String typedecl = type.getType();
+        if (typedecl == null) {
+            typedecl = type.getName();
+        }
         String assigned_type = ((Variable_t) n.f1.accept(this, argu)).getType();
         if (assigned_type != null && !typedecl.equals(assigned_type)) {
             if (!typedecl.equals("EncInt") || !assigned_type.equals("int")) {
@@ -219,6 +224,7 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
         Method_t meth = ((Class_t) argu).getMethod(methName);
         n.f0.accept(this, meth);
         String methType = ((Variable_t) n.f1.accept(this, argu)).getType();
+        n.f7.accept(this, meth);
         n.f8.accept(this, meth);
         Variable_t retType = (Variable_t) n.f10.accept(this, meth);
         retType = findType(retType, meth);
@@ -553,7 +559,6 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
      */
     public Base_t visit(ForStatement n, Base_t argu) throws Exception {
         n.f2.accept(this, argu);
-
         Variable_t cond = (Variable_t) n.f3.accept(this, argu);
         n.f5.accept(this, argu);
         n.f7.accept(this, argu);

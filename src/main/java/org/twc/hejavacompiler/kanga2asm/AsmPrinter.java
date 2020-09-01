@@ -43,9 +43,6 @@ public class AsmPrinter {
     }
 
     public void begin(String method) {
-        indent_ = 2;
-        println(".text");
-        println(".globl " + method);
         indent_ = 0;
         println("__" + method + "__:");
         indent_ = 2;

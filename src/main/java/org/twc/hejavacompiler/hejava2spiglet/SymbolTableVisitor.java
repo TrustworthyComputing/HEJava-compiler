@@ -11,8 +11,9 @@ import java.util.ArrayList;
 /* Second Visitor Pattern creates the Symbol Table */
 public class SymbolTableVisitor extends GJNoArguDepthFirst<Base_t> {
 
-    private Map<String, Class_t> st_;
+    private final Map<String, Class_t> st_;
     private int globals_;
+    private Method_t meth_with_for;
 
     public SymbolTableVisitor(Map<String, Class_t> st) {
         st_ = st;
@@ -104,12 +105,8 @@ public class SymbolTableVisitor extends GJNoArguDepthFirst<Base_t> {
         }
         if (n.f15.present()) {
             for (int i = 0; i < n.f15.size(); i++) {
-                Variable_t var_from_for_statement = (Variable_t) n.f15.nodes.get(i).accept(this);
-                if (var_from_for_statement != null) {
-                    if (!m.addVar(new Variable_t(var_from_for_statement.getType(), var_from_for_statement.getName()))) {
-                        throw new Exception("Class " + classname + ": Variable " + var_from_for_statement.getName() + " already exists");
-                    }
-                }
+                meth_with_for = m;
+                n.f15.nodes.get(i).accept(this);
             }
         }
         n.f16.accept(this);
@@ -375,12 +372,8 @@ public class SymbolTableVisitor extends GJNoArguDepthFirst<Base_t> {
         // add any vars from for statements
         if (n.f8.present()) {
             for (int i = 0; i < n.f8.size(); i++) {
-                Variable_t var_from_for_statement = (Variable_t) n.f8.nodes.get(i).accept(this);
-                if (var_from_for_statement != null) {
-                    if (!meth.addVar(new Variable_t(var_from_for_statement.getType(), var_from_for_statement.getName()))) {
-                        throw new Exception("Class " + meth_name + ": Variable " + var_from_for_statement.getName() + " already exists");
-                    }
-                }
+                meth_with_for = meth;
+                n.f8.nodes.get(i).accept(this);
             }
         }
         n.f9.accept(this);
@@ -471,6 +464,9 @@ public class SymbolTableVisitor extends GJNoArguDepthFirst<Base_t> {
      */
     public Base_t visit(ForStatement n) throws Exception {
         Variable_t vardef = (Variable_t) n.f2.accept(this);
+        if (!meth_with_for.addVar(new Variable_t(vardef.getType(), vardef.getName()))) {
+            throw new Exception("Class " + meth_with_for.getName() + ": Variable " + vardef.getName() + " already exists");
+        }
         n.f3.accept(this);
         n.f5.accept(this);
         n.f7.accept(this);
