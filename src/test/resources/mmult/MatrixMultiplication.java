@@ -16,22 +16,19 @@ class MatrixMultiplication {
 
 		i = 0;
 		while (i < (rows_1 * cols_1_rows_2)) {
-			x = PrivateTape.read();
-			a[i] = x;
+			a[i] = PrivateTape.read();
 			i++;
 		}
 
 		i = 0;
 		while (i < (cols_1_rows_2 * cols_2)) {
-			x = PrivateTape.read();
-			b[i] = x;
+			b[i] = PrivateTape.read();
 			i++;
 		}
 
 		i = 0;
 		while (i < (rows_1 * cols_2)) {
-			x = 0;
-			res[i] = x;
+			res[i] = 0;
 			i++;
 		}
 
