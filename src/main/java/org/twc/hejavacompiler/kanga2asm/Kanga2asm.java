@@ -394,11 +394,11 @@ public class Kanga2asm extends GJNoArguDepthFirst<String> {
      */
     public String visit(Operator n) throws Exception {
         String[] retValue = {
-                "slt", "sle", "seq", "sne",         // comparison
+                "cmpl", "cmpleq", "cmpeq", "cmpneq",         // comparison
                 "add", "sub", "mult", "div", "mod", // arithmetic
                 "and", "or", "xor", "sll", "slr",    // bitwise
 
-                "eslt", "esle", "eseq", "esne",         // comparison
+                "ecmpl", "ecmpleq", "ecmpeq", "ecmpneq",         // comparison
                 "eadd", "esub", "emult", "ediv", "emod", // arithmetic
                 "eand", "eor", "exor", "esll", "eslr"    // bitwise
         };
