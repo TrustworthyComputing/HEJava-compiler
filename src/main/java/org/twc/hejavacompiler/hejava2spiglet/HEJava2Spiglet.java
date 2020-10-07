@@ -848,12 +848,12 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
         if (vartype_.equals("EncInt") || vartype_.equals("EncInt[]")) {
             opcode = "E_" + opcode;
             binexpr_type = vartype_;
-            if (!t1_type.equals("EncInt")) { // if it's an operation between unencrypted and encrypted
+            if (t1_type != null && !t1_type.equals("EncInt")) { // if it's an operation between unencrypted and encrypted
                 String enc_temp_1 = newTemp();
                 this.asm_.append("E_CONST ").append(enc_temp_1).append(" ").append(t1).append("\n");
                 t1 = enc_temp_1;
             }
-            if (!t2_type.equals("EncInt")) { // if it's an operation between unencrypted and encrypted
+            if (t2_type != null && !t2_type.equals("EncInt")) { // if it's an operation between unencrypted and encrypted
                 String enc_temp_2 = newTemp();
                 this.asm_.append("E_CONST ").append(enc_temp_2).append(" ").append(t2).append("\n");
                 t2 = enc_temp_2;

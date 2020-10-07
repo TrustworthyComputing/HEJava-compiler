@@ -457,7 +457,7 @@ public class TypeCheckVisitor extends GJDepthFirst<Base_t, Base_t> {
         val = findType(val, (Method_t) argu);
         if (array.getType().equals("int[]") && idx.getType().equals("int") && val.getType().equals("int")) {
             return null;
-        } else if (array.getType().equals("EncInt[]") && idx.getType().equals("int") && val.getType().equals("EncInt")) {
+        } else if (array.getType().equals("EncInt[]") && idx.getType().equals("int") && (val.getType().equals("EncInt") || val.getType().equals("int"))) {
             return null;
         }
         throw new Exception("Error: assignment in " + array.getType() + " array an " + val.getType() + " type");
