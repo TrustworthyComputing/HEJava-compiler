@@ -588,8 +588,10 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
         String error_label = "Runtime_Error";
         String array = ((Variable_t) n.f0.accept(this, argu)).getRegister();
         this.asm_.append("HLOAD ").append(length).append(" ").append(array).append(" 0\n"); // load length
+        vartype_ = "int";
         String idx = ((Variable_t) n.f2.accept(this, argu)).getRegister();
         String one = newTemp();
+        vartype_ = (identifier.getType().equals("int[]")) ? "int" : "EncInt";
         // if idx < arr.length
         this.asm_.append("MOVE ").append(cond).append(" LT ").append(idx).append(" ").append(length).append("\n");
         this.asm_.append("CJUMP ").append(cond).append(" ").append(error_label).append("\n");
