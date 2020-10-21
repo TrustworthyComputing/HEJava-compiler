@@ -494,10 +494,6 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
         Variable_t identifier = (Variable_t) n.f0.accept(this, argu);
         vartype_ = identifier.getType();
         String operator = n.f1.accept(this, argu).getName();
-        Variable_t v2 = (Variable_t) n.f2.accept(this, argu);
-        String id = identifier.getName();
-        String expr = v2.getRegister();
-        String t2_type = v2.getType();
         String opcode;
         if ("+=".equals(operator)) {
             opcode = "PLUS";
@@ -522,13 +518,23 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
         } else {
             throw new IllegalStateException("CompoundAssignmentStatement: unexpected value " + operator);
         }
+        if (opcode.equals("SLL") || opcode.equals("SRL")) {
+            vartype_ = "int";
+        }
+        Variable_t v2 = (Variable_t) n.f2.accept(this, argu);
+        vartype_ = prev_var_type;
+        String id = identifier.getName();
+        String expr = v2.getRegister();
+        String t2_type = v2.getType();
         if (vartype_.equals("EncInt") || vartype_.equals("EncInt[]")) {
-            opcode = "E_" + opcode;
-            if (!t2_type.equals("EncInt")) { // if it's an operation between unencrypted and encrypted
-                String enc_temp_2 = newTemp();
-                this.asm_.append("E_CONST ").append(enc_temp_2).append(" ").append(expr).append("\n");
-                expr = enc_temp_2;
+            if (! (opcode.equals("SLL") || opcode.equals("SRL"))) {
+                if (!t2_type.equals("EncInt")) { // if it's an operation between unencrypted and encrypted
+                    String enc_temp_2 = newTemp();
+                    this.asm_.append("E_CONST ").append(enc_temp_2).append(" ").append(expr).append("\n");
+                    expr = enc_temp_2;
+                }
             }
+            opcode = "E_" + opcode;
         }
         Method_t meth = (Method_t) argu;
         if (meth != null) {
@@ -800,14 +806,7 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
         String prev_var_type = vartype_;
         Variable_t v1 = (Variable_t) n.f0.accept(this, argu);
         String operator = n.f1.accept(this, argu).getName();
-        Variable_t v2 = (Variable_t) n.f2.accept(this, argu);
-        String ret = newTemp();
-        String t1 = v1.getRegister();
-        String t1_type = v1.getType();
-        String t2 = v2.getRegister();
-        String t2_type = v2.getType();
         String opcode;
-        String binexpr_type = "int";
         if ("&".equals(operator)) {
             opcode = "AND";
         } else if ("|".equals(operator)) {
@@ -847,19 +846,32 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
         } else {
             throw new IllegalStateException("CompoundAssignmentStatement: Unexpected value: " + operator);
         }
+        if (opcode.equals("SLL") || opcode.equals("SRL")) {
+            vartype_ = "int";
+        }
+        Variable_t v2 = (Variable_t) n.f2.accept(this, argu);
+        vartype_ = prev_var_type;
+        String ret = newTemp();
+        String t1 = v1.getRegister();
+        String t1_type = v1.getType();
+        String t2 = v2.getRegister();
+        String t2_type = v2.getType();
+        String binexpr_type = "int";
         if (vartype_.equals("EncInt") || vartype_.equals("EncInt[]")) {
-            opcode = "E_" + opcode;
             binexpr_type = vartype_;
             if (t1_type != null && !t1_type.equals("EncInt")) { // if it's an operation between unencrypted and encrypted
                 String enc_temp_1 = newTemp();
                 this.asm_.append("E_CONST ").append(enc_temp_1).append(" ").append(t1).append("\n");
                 t1 = enc_temp_1;
             }
-            if (t2_type != null && !t2_type.equals("EncInt")) { // if it's an operation between unencrypted and encrypted
-                String enc_temp_2 = newTemp();
-                this.asm_.append("E_CONST ").append(enc_temp_2).append(" ").append(t2).append("\n");
-                t2 = enc_temp_2;
+            if (! (opcode.equals("SLL") || opcode.equals("SRL"))) {
+                if (t2_type != null && !t2_type.equals("EncInt")) { // if it's an operation between unencrypted and encrypted
+                    String enc_temp_2 = newTemp();
+                    this.asm_.append("E_CONST ").append(enc_temp_2).append(" ").append(t2).append("\n");
+                    t2 = enc_temp_2;
+                }
             }
+            opcode = "E_" + opcode;
         }
         switch (opcode) {
             case "GT": {
