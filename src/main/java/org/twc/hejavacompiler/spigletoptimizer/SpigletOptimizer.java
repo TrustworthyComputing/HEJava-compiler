@@ -29,6 +29,7 @@ public class SpigletOptimizer {
 
     public InputStream performOptimizations(InputStream input_stream, String filepath) throws Exception {
         String filepath_no_extension = filepath.substring(0, filepath.lastIndexOf('.'));
+        filepath_no_extension = filepath_no_extension.replace("..", "");
         System.out.println("[  \u2022  ] Optimizing Spiglet code until a fixed-point");
 
         Map<String, Map<String, String>> prev_optimizations_map, optimizations_map = null;
