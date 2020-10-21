@@ -942,7 +942,10 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
         String array = ((Variable_t) n.f0.accept(this, argu)).getRegister();
         // load length
         this.asm_.append("HLOAD ").append(length).append(" ").append(array).append(" 0\n");
+        vartype_ = "int";
         String idx = ((Variable_t) n.f2.accept(this, argu)).getRegister();
+        vartype_ = (((Variable_t) n.f0.accept(this, argu)).getType().equals("int[]")) ? "int" : "EncInt";
+
         // if idx < arr.length
         this.asm_.append("MOVE ").append(cond).append(" LT ").append(idx).append(" ").append(length).append("\n");
         this.asm_.append("CJUMP ").append(cond).append(" ").append(error_label).append("\n");
