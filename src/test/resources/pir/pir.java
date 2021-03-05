@@ -3,9 +3,8 @@ class pir {
 	public static void main(String[] a){
 		int i;
 		int key;
-		int k;
-		int val;
-		int x;
+		EncInt k;
+		EncInt val;
 		int size;
 		size = PublicTape.read();
 		key = PublicTape.read();
