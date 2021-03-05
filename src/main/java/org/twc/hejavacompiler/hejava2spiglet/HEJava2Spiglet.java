@@ -1259,11 +1259,14 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
      * f4 -> "]"
      */
     public Base_t visit(ArrayAllocationExpression n, Base_t argu) throws Exception {
+        String prev_var_type = vartype_;
+        vartype_ = "int";
         String len = ((Variable_t) n.f3.accept(this, argu)).getRegister();
         String cond = newTemp();
         String one = newTemp();
         String len_to_alloc = newTemp();
         String array = newTemp();
+        vartype_ = prev_var_type;
         // check if length > 0
         this.may_has_error_ = true;
         this.asm_.append("MOVE ").append(cond).append(" LT ").append(len).append(" 0\n");
@@ -1284,11 +1287,14 @@ public class HEJava2Spiglet extends GJDepthFirst<Base_t, Base_t> {
      * f4 -> "]"
      */
     public Base_t visit(EncryptedArrayAllocationExpression n, Base_t argu) throws Exception {
+        String prev_var_type = vartype_;
+        vartype_ = "int";
         String len = ((Variable_t) n.f3.accept(this, argu)).getRegister();
         String cond = newTemp();
         String one = newTemp();
         String len_to_alloc = newTemp();
         String array = newTemp();
+        vartype_ = prev_var_type;
         // check if length > 0
         this.may_has_error_ = true;
         this.asm_.append("MOVE ").append(cond).append(" LT ").append(len).append(" 0\n");
