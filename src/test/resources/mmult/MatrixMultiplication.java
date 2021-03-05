@@ -41,7 +41,7 @@ class MatrixMultiplication {
 					x = res[((i*cols_2) + j)];
 					y = a[((i * cols_1_rows_2) + k)];
 					z = b[((k * cols_2) + j)];
-					res[((i*cols_2) + j)] = (x + y) + z;
+					res[((i*cols_2) + j)] = x + (y * z);
 					k = k + 1;
 				}
 				j = j + 1;
